@@ -64,3 +64,45 @@ valorY (c:cs) n = valorY cs (n-1)
 posValida :: Tablero -> Posicion -> Bool
 posValida t (x,y) = x >= 1 && x <= (cantidadFilas t) && y >= 1 && y <= (cantidadColumnas t) 
 
+-- Ejercicio 1
+maximoElemento :: Integer -> Integer -> Integer
+maximoElemento x y
+  | x >= y = x
+  | otherwise = y
+
+maximoFila :: Fila -> Integer
+maximoFila [] = 0
+maximoFila (x:xs) = maximoElemento x (maximoFila xs)
+
+maximo :: Tablero -> Integer
+maximo [] = 0
+maximo (f:fs) = maximoElemento (maximoFila f) (maximo fs)
+
+-- Ejercicio 2
+
+contarRepeticiones :: Integer -> Fila -> Integer -> (Integer, Integer)
+contarRepeticiones _ [] c = c
+contarRepeticiones y (x:xs) c
+  | y == x = contarRepeticiones y xs (c+1)
+  | otherwise = contarRepeticiones y xs c
+
+contar :: Integer -> Fila -> (Integer, Integer)
+contar y (x:xs) = contarRepeticiones y (x:xs) 1
+
+masRepetidoElemento :: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
+masRepetidoElemento (x, cx) (y, cy)
+  | cx >= cy = (x, cx)
+  | otherwise = (y, cy)
+
+masRepetidoFila :: Fila -> Integer -> (Integer, Integer)
+masRepetidoFila (x:xs) c = masRepetidoElemento (contar x xs) (masRepetidoFila xs)
+
+masRepetidoVeces :: Tablero -> (Integer, Integer)
+masRepetidoVeces [] = 0
+masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila f) (masRepetidoVeces fs)
+
+masRepetido :: Tablero -> Integer
+masRepetido t = fst (masRepetidoVeces t)
+
+
+permutarTablero :: Tablero -> Conjunto Tablero
