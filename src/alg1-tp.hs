@@ -8,11 +8,12 @@
 -- INTEGRANTE 1:
 -- INTEGRANTE 2:
 -----------------------------------------------------------------------
-import Conjuntos
 module SolucionTP
-( maximo )
-where
-type Conjunto a = [a]
+where 
+
+import Conjuntos
+
+-- type Conjunto a = [a]
 type Fila = [Integer]
 type Tablero = [Fila]
 type Posicion = (Integer,Integer)
