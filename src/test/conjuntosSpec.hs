@@ -1,3 +1,7 @@
+-- Instalar librerias 
+-- cabal update && cabal install --lib hspec 
+-- Correr tests 
+-- runhaskell test/conjuntosSpec.hs
 module ConjuntosSpec where
 
 import Test.Hspec
