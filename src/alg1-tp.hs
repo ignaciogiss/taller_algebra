@@ -9,6 +9,7 @@
 -- INTEGRANTE 2:
 -----------------------------------------------------------------------
 module SolucionTP
+( maximo )
 where 
 
 import Conjuntos
