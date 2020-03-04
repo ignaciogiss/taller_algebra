@@ -148,29 +148,57 @@ maximo (f:fs) = maximoElemento (maximoFila f) (maximo fs)
 
 -- Ejercicio 2
 
--- contarRepeticiones :: Integer -> Fila -> Integer -> (Integer, Integer)
--- contarRepeticiones _ [] c = c
--- contarRepeticiones y (x:xs) c
---   | y == x = contarRepeticiones y xs (c+1)
---   | otherwise = contarRepeticiones y xs c
+contarRepeticiones :: Fila -> Integer -> (Integer, Integer)
+contarRepeticiones [y] c = (y, c)
+contarRepeticiones (y:x:xs) c
+  | y == x = contarRepeticiones xs (c+1)
+  | otherwise = (y, c)
 
--- contar :: Integer -> Fila -> (Integer, Integer)
--- contar y (x:xs) = contarRepeticiones y (x:xs) 1
+masRepetidoElemento :: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
+masRepetidoElemento (x, cx) (y, cy)
+  | cx >= cy = (x, cx)
+  | otherwise = (y, cy)
 
--- masRepetidoElemento :: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
--- masRepetidoElemento (x, cx) (y, cy)
---   | cx >= cy = (x, cx)
---   | otherwise = (y, cy)
+masRepetidoFila :: Fila -> (Integer, Integer)
+masRepetidoFila [] = (0, 0) 
+masRepetidoFila (x:xs) = masRepetidoElemento (contarRepeticiones (x:xs) 0) (masRepetidoFila xs)
 
--- masRepetidoFila :: Fila -> Integer -> (Integer, Integer)
--- masRepetidoFila (x:xs) c = masRepetidoElemento (contar x xs) (masRepetidoFila xs)
+masRepetidoVeces :: Tablero -> (Integer, Integer)
+masRepetidoVeces [] = (0, 0)
+masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila (ordenar f)) (masRepetidoVeces fs)
 
--- masRepetidoVeces :: Tablero -> (Integer, Integer)
--- masRepetidoVeces [] = 0
--- masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila f) (masRepetidoVeces fs)
-
--- masRepetido :: Tablero -> Integer
--- masRepetido t = fst (masRepetidoVeces t)
+masRepetido :: Tablero -> Integer
+masRepetido t = fst (masRepetidoVeces t)
 
 
 -- permutarTablero :: Tablero -> Conjunto Tablero
+
+-----------------------------------------------------------------------
+-- AUX
+-----------------------------------------------------------------------
+tomarHasta :: [a] -> Integer -> [a]
+tomarHasta [] _ = []
+tomarHasta xs 0 = [] 
+tomarHasta (x:xs) n = x : tomarHasta xs (n-1)
+
+borrarHasta :: [a] -> Integer -> [a]
+borrarHasta [] _ = []
+borrarHasta xs 0 = xs
+borrarHasta (x:xs) n = borrarHasta xs (n-1)
+
+unir :: (Ord a) => [a] -> [a] -> [a]
+unir [] xs = xs
+unir xs [] = xs
+unir (x:xs) (y:ys)
+    | (x < y) = x:unir xs (y:ys)
+    | otherwise = y:unir (x:xs) ys
+ 
+dividirALaMitad :: [a] -> ([a], [a])
+dividirALaMitad xs = (tomarHasta xs n, borrarHasta xs n)
+    where n = toInteger (div (length xs) 2) 
+ 
+ordenar :: (Ord a) => [a] -> [a]
+ordenar xs 
+    | (length xs) > 1 = unir (ordenar ls) (ordenar rs)
+    | otherwise = xs
+    where (ls, rs) = dividirALaMitad xs
