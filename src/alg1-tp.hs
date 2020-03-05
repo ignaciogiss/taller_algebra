@@ -2,11 +2,12 @@
 -- TALLER DE ALGEBRA I
 -- Verano 2020
 
--- NUMERO DE GRUPO: 
+-- NUMERO DE GRUPO: 2 
 
 -- Nombre y LU/DNI de los integrantes del grupo:
 -- INTEGRANTE 1:
 -- INTEGRANTE 2:
+-- INTEGRANTE 3:
 -----------------------------------------------------------------------
 module SolucionTP
 ( maximo )
@@ -148,30 +149,84 @@ maximo (f:fs) = maximoElemento (maximoFila f) (maximo fs)
 
 -- Ejercicio 2
 
-contarRepeticiones :: Fila -> Integer -> (Integer, Integer)
-contarRepeticiones [y] c = (y, c)
-contarRepeticiones (y:x:xs) c
-  | y == x = contarRepeticiones xs (c+1)
-  | otherwise = (y, c)
+-- contarRepeticiones :: Fila -> Integer -> (Integer, Integer)
+-- contarRepeticiones [y] c = (y, c)
+-- contarRepeticiones (y:x:xs) c
+--   | y == x = contarRepeticiones (x:xs) (c+1)
+--   | otherwise = (y, c)
 
 masRepetidoElemento :: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
 masRepetidoElemento (x, cx) (y, cy)
   | cx >= cy = (x, cx)
   | otherwise = (y, cy)
 
-masRepetidoFila :: Fila -> (Integer, Integer)
-masRepetidoFila [] = (0, 0) 
-masRepetidoFila (x:xs) = masRepetidoElemento (contarRepeticiones (x:xs) 0) (masRepetidoFila xs)
+-- masRepetidoFila :: Fila -> (Integer, Integer)
+-- masRepetidoFila [] = (0, 0) 
+-- masRepetidoFila (x:xs) = masRepetidoElemento (contarRepeticiones (x:xs) 0) (masRepetidoFila xs)
+
+-- masRepetidoVeces :: Tablero -> (Integer, Integer)
+-- masRepetidoVeces [] = (0, 0)
+-- masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila (ordenar f)) (masRepetidoVeces fs)
+
+-- masRepetido :: Tablero -> Integer
+-- masRepetido t = fst (masRepetidoVeces t)
+
+
+-- ordeno la fila 
+-- busco max -> (e,e)
+--
+
+masRepetidoFila :: (Integer, Integer) -> Fila -> Integer -> (Integer, Integer)
+masRepetidoFila m [x] c = masRepetidoElemento m (x, c)
+masRepetidoFila m (y:x:xs) c
+  | x == y = masRepetidoElemento m (masRepetidoFila m (x:xs) (c+1))
+  | otherwise = masRepetidoElemento m (masRepetidoFila m (x:xs) 0)
 
 masRepetidoVeces :: Tablero -> (Integer, Integer)
 masRepetidoVeces [] = (0, 0)
-masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila (ordenar f)) (masRepetidoVeces fs)
+masRepetidoVeces (f:fs) = masRepetidoElemento (masRepetidoFila (0, 0) (ordenar f) 0) (masRepetidoVeces fs) 
 
 masRepetido :: Tablero -> Integer
-masRepetido t = fst (masRepetidoVeces t)
-
+masRepetido t = fst  (masRepetidoVeces t) 
 
 -- permutarTablero :: Tablero -> Conjunto Tablero
+
+-- Ejercicio 3
+valoresDeCamino :: Tablero -> Camino -> [Integer]
+valoresDeCamino t [] = []
+valoresDeCamino t (p:ps) = (valor t p) : (valoresDeCamino t ps)
+
+-- Ejercicio 4
+caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
+caminoDeCollatz t c a = esCaminoDeCollatz (valoresDeCamino t c) a
+
+siguienteTerminoCollatz :: Integer -> Integer
+siguienteTerminoCollatz a
+  | mod a 2 == 0 = div a 2
+  | otherwise = 3*a + 1
+
+esCaminoDeCollatz :: [Integer] -> Integer -> Bool
+esCaminoDeCollatz [] _ = True 
+esCaminoDeCollatz (x:xs) a 
+  | x == a = esCaminoDeCollatz xs (siguienteTerminoCollatz a)
+  | otherwise = False
+
+-- Ejercicio 5
+mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
+mayorSecuenciaDeCollatz t a = caminoMasLargo (calcularTodosCollatz t (encontrarTodasPos a))
+
+calcularTodosCollatz :: Tablero -> [Posicion] -> [Camino]
+calcularTodosCollatz t [] = []
+calcularTodosCollatz t (p:ps) = (calcularCollatz t p) : (calcularTodosCollatz t ps)
+
+calcularCollatz :: Tablero -> Posicion
+calcularCollatz t p = 
+
+encontrarTodasPos :: Tablero -> Integer -> Posicion -> [Posicion]
+encontrarTodasPos t a p 
+  | not posValida t p = []
+  | valor t p == a = p : (encontrarTodasPos t a (avanzar p))
+  | otherwise = encontrarTodasPos t a (avanzar p)   
 
 -----------------------------------------------------------------------
 -- AUX
