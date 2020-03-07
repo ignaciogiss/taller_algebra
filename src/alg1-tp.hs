@@ -213,20 +213,55 @@ esCaminoDeCollatz (x:xs) a
 
 -- Ejercicio 5
 mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
-mayorSecuenciaDeCollatz t a = caminoMasLargo (calcularTodosCollatz t (encontrarTodasPos a))
+mayorSecuenciaDeCollatz t a = valoresCamino t (caminoMasLargoDeTodos (calcularTodosCollatz t (encontrarTodasPos t (1, 1) a) a))
 
-calcularTodosCollatz :: Tablero -> [Posicion] -> [Camino]
-calcularTodosCollatz t [] = []
-calcularTodosCollatz t (p:ps) = (calcularCollatz t p) : (calcularTodosCollatz t ps)
+valoresCamino :: Tablero -> Camino -> [Integer]
+valoresCamino _ [] = []
+valoresCamino t (p:ps) = (valor t p) : (valoresCamino t ps)
 
-calcularCollatz :: Tablero -> Posicion
-calcularCollatz t p = 
+calcularTodosCollatz :: Tablero -> [Posicion] -> Integer -> [Camino]
+calcularTodosCollatz t [] _ = []
+calcularTodosCollatz t (p:ps) a = (calcularCollatz t p a) : (calcularTodosCollatz t ps a)
 
-encontrarTodasPos :: Tablero -> Integer -> Posicion -> [Posicion]
-encontrarTodasPos t a p 
-  | not posValida t p = []
-  | valor t p == a = p : (encontrarTodasPos t a (avanzar p))
-  | otherwise = encontrarTodasPos t a (avanzar p)   
+calcularCollatz :: Tablero -> Posicion -> Integer -> Camino
+-- calcularCollatz t p a = caminoMasLargo (collatzAbajo t p a) (collatzDerecha t p a)
+calcularCollatz t p a
+  | not (posValida t p) = []
+  | valor t p == a = p : caminoMasLargo (calcularCollatz t (avanzarX p) (siguienteTerminoCollatz a)) (calcularCollatz t (avanzarY p) (siguienteTerminoCollatz a))
+  | otherwise = []
+
+encontrarTodasPos :: Tablero -> Posicion -> Integer -> [Posicion]
+encontrarTodasPos t p a 
+  | not (posValida t p) = []
+  | valor t p == a = p : (encontrarTodasPos t (avanzar t p) a)
+  | otherwise = encontrarTodasPos t (avanzar t p) a 
+
+
+-- Funciones auxiliares para tablero
+------------------------------------
+-- Avanza una posicion en el tablero
+-- Si llega al final de una fila avanza al principio de la siguiente fila
+-- Si llega al final de la ultima fila avanza y queda en una posicion no valida
+-- por lo tanto es necesario validar posValida a la salida de la funcion avanzar
+avanzar :: Tablero -> Posicion -> Posicion
+avanzar t (x, y) 
+  | x < cantidadColumnas t = (x+1, y)
+  | otherwise = (1, y+1)
+
+avanzarX :: Posicion -> Posicion
+avanzarX (x, y) = (x+1, y)
+
+avanzarY :: Posicion -> Posicion
+avanzarY (x, y) = (x, y+1)
+
+caminoMasLargoDeTodos :: [Camino] -> Camino
+caminoMasLargoDeTodos [] = []
+caminoMasLargoDeTodos (c:cs) = caminoMasLargo c (caminoMasLargoDeTodos cs) 
+
+caminoMasLargo :: Camino -> Camino -> Camino
+caminoMasLargo c1 c2
+  | (length c1) >= (length c2) = c1
+  | otherwise = c2
 
 -----------------------------------------------------------------------
 -- AUX
