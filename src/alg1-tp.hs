@@ -64,6 +64,16 @@ valorY (c:cs) n = valorY cs (n-1)
 posValida :: Tablero -> Posicion -> Bool
 posValida t (x,y) = x >= 1 && x <= (cantidadFilas t) && y >= 1 && y <= (cantidadColumnas t) 
 
+-- Funciones auxiliares de tablero
+----------------------------------
+filasPermutadas :: Tablero -> [Integer] -> Tablero
+filasPermutadas _ [] = []
+filasPermutadas t (x:xs) = (valorFila t x) : (filasPermutadas t xs)
+
+valorFila :: Tablero -> Integer -> Fila
+valorFila (t:ts) 1 = t
+valorFila (t:ts) n = valorFila ts (n-1)
+
 -----------------------------------------------------------------------
 -- CONJUNTOS
 -----------------------------------------------------------------------
@@ -129,6 +139,7 @@ insertarEnTodaListaEnTodaPos n (x:cxs) = union (insertarEnTodaPosicion n x) (ins
 
 insertarEnTodaPosicion :: Integer -> [Integer] -> Conjunto [Integer]
 insertarEnTodaPosicion n xs = insertarEnTodaPosHasta n xs (toInteger(length xs) + 1) 
+
 
 -----------------------------------------------------------------------
 -- SOLUCIONES
@@ -202,6 +213,7 @@ caminoDeCollatz t c a = esCaminoDeCollatz (valoresDeCamino t c) a
 
 siguienteTerminoCollatz :: Integer -> Integer
 siguienteTerminoCollatz a
+  | a == 1 = 1
   | mod a 2 == 0 = div a 2
   | otherwise = 3*a + 1
 
@@ -224,7 +236,6 @@ calcularTodosCollatz t [] _ = []
 calcularTodosCollatz t (p:ps) a = (calcularCollatz t p a) : (calcularTodosCollatz t ps a)
 
 calcularCollatz :: Tablero -> Posicion -> Integer -> Camino
--- calcularCollatz t p a = caminoMasLargo (collatzAbajo t p a) (collatzDerecha t p a)
 calcularCollatz t p a
   | not (posValida t p) = []
   | valor t p == a = p : caminoMasLargo (calcularCollatz t (avanzarX p) (siguienteTerminoCollatz a)) (calcularCollatz t (avanzarY p) (siguienteTerminoCollatz a))
@@ -245,8 +256,8 @@ encontrarTodasPos t p a
 -- por lo tanto es necesario validar posValida a la salida de la funcion avanzar
 avanzar :: Tablero -> Posicion -> Posicion
 avanzar t (x, y) 
-  | x < cantidadColumnas t = (x+1, y)
-  | otherwise = (1, y+1)
+  | x < (cantidadColumnas t) - 1 = avanzarX (x, y) 
+  | otherwise = avanzarY (1, y) 
 
 avanzarX :: Posicion -> Posicion
 avanzarX (x, y) = (x+1, y)
@@ -256,12 +267,38 @@ avanzarY (x, y) = (x, y+1)
 
 caminoMasLargoDeTodos :: [Camino] -> Camino
 caminoMasLargoDeTodos [] = []
-caminoMasLargoDeTodos (c:cs) = caminoMasLargo c (caminoMasLargoDeTodos cs) 
+caminoMasLargoDeTodos (c:cs) = caminoMasLargo c (caminoMasLargoDeTodos cs)
 
-caminoMasLargo :: Camino -> Camino -> Camino
+caminoMasLargo :: Ord a => [a] -> [a] -> [a]
 caminoMasLargo c1 c2
   | (length c1) >= (length c2) = c1
   | otherwise = c2
+
+-- lista mas larga
+masLargoDeTodos :: Ord a => [[a]] -> [a]
+masLargoDeTodos [] = []
+masLargoDeTodos (c:cs) = masLargo c (masLargoDeTodos cs) 
+
+masLargo :: Ord a => [a] -> [a] -> [a]
+masLargo c1 c2
+  | (length c1) >= (length c2) = c1
+  | otherwise = c2
+
+-- Ejercicio 6
+mayorSecuenciaDeCollatzPermutando :: Tablero -> Integer -> [Integer]
+mayorSecuenciaDeCollatzPermutando t a = masLargoDeTodos ( todasSecuenciasDeCollatzPermutado (todasPermutacionesTablero t) a)
+
+todasSecuenciasDeCollatzPermutado :: Conjunto Tablero -> Integer -> [[Integer]]
+todasSecuenciasDeCollatzPermutado [] _ = []
+todasSecuenciasDeCollatzPermutado (t:ts) a = (mayorSecuenciaDeCollatz t a) : (todasSecuenciasDeCollatzPermutado ts a)
+
+-- Obtener todas las permutaciones de un Tablero
+todasPermutacionesTablero :: Tablero -> Conjunto Tablero
+todasPermutacionesTablero t  = permutacionesTablero t (permutaciones (cantidadFilas t))
+
+permutacionesTablero :: Tablero -> [[Integer]] -> Conjunto Tablero
+permutacionesTablero _ [] = []
+permutacionesTablero t (p:ps) = agregar (filasPermutadas t p) (permutacionesTablero t ps) 
 
 -----------------------------------------------------------------------
 -- AUX
