@@ -81,48 +81,75 @@ maximoDeLaFila (n1:n2:ns)|n1>n2 = maximoDeLaFila (n1:ns)
 -----------------------------------------------------------------------
 --2)
 masRepetido :: Tablero -> Integer
-masRepetido ts = devuelveElMasRepetido(concatenar ts)
+masRepetido ts = fst (maximasRepeticionesEnLista (ordenar (concatenar ts)))
 
 -- convierte el tablero en una lista
 concatenar :: Tablero -> [Integer]
 concatenar (x:[]) = x
 concatenar (x:xs) = x ++ concatenar xs    
 
--- dada una lista devuelve el mas repetido
-devuelveElMasRepetido :: [Integer] -> Integer 
-devuelveElMasRepetido xs = devuelvefstDadosnd (maximosndDeLista (listDeApariciones xs)) (listDeApariciones xs)
+-- Dada una lista de elementos devuelve una tupla con el elemento con mayor cantidad
+-- de repeticiones y la cantidad de repeticiones del mismo
+maximasRepeticionesEnLista :: Eq a => [a] -> (a, Integer)
+maximasRepeticionesEnLista (x:xs) = maximasRepeticiones x 1 xs (x, 1) 
 
--- dado snd y una list de tuplas devuelve fst para ese snd de esa tupla
-devuelvefstDadosnd :: Integer -> [(Integer,Integer)] -> Integer
-devuelvefstDadosnd n (x:[]) = fst x
-devuelvefstDadosnd n (x:xs) | n == snd x = fst x
-                            | otherwise = (devuelvefstDadosnd n xs) 
+-- Dado un elemento a, la cantidad de repeticiones del mismo c, una lista (x:xs) y 
+-- una tupla con el elemento con mayor cantidad de repeticiones m
+-- devuelve una tupla con el elemento con mayor cantidad de repeticiones
+-- y la cantidad de repeticiones del mismo en la segunda coordenada de la tupla.
+maximasRepeticiones :: Eq a => a -> Integer -> [a] -> (a, Integer) -> (a, Integer)
+maximasRepeticiones _ _ [] m = m 
+maximasRepeticiones a c (x:xs) m 
+  | a == x = maximasRepeticiones x (c+1) xs (maxElemento (x, c) m)
+  | otherwise = maximasRepeticiones x 1 xs (maxElemento (a, c) m)
 
--- dada una lista de enteros (x:xs) devuelve una lista de pares.
--- donde la primer coordenada del par es un elemento de la lista y la segunda coordenada es 
--- la cantidad de veces que aparaece en la lista. 
-listDeApariciones :: [Integer] -> [(Integer,Integer)]
-listDeApariciones [] = []
-listDeApariciones (x : []) = [(x,1)] 
-listDeApariciones (x:xs) = (x,cantApariciones x xs + 1)  : listDeApariciones ( quitarTodaAparicion x (xs) ) 
+-- Dadas dos tuplas devuelve la tupla cuya segunda coordenada es mayor.
+-- La segunda coordenada de la tupla corresponde con la cantidad de ocurrencias
+-- del elemento en la primer coordenada de la tupla.
+maxElemento :: (a, Integer) -> (a, Integer) -> (a, Integer)
+maxElemento (x, cx) (y, cy)
+  | cx >= cy = (x, cx)
+  | otherwise = (y, cy)
 
--- quita todas las apariciones de un entero de una lista
-quitarTodaAparicion :: Integer -> [Integer] -> [Integer]
-quitarTodaAparicion n xs | length xs == 0 = []
-                         | length xs > 0 && head xs /= n = head xs : [] ++ quitarTodaAparicion n (tail xs)
-                         | otherwise = quitarTodaAparicion n (tail xs)
+-- Ordena una lista de elementos.
+ordenar :: (Ord a) => [a] -> [a]
+ordenar xs 
+    | (length xs) > 1 = unir (ordenar ls) (ordenar rs)
+    | otherwise = xs
+    where (ls, rs) = dividirALaMitad xs
 
--- de una lista de tuplas busca el maximo snd
-maximosndDeLista :: [(Integer,Integer)] -> Integer
-maximosndDeLista (x:[]) = snd x
-maximosndDeLista (x:xs) = max (snd x) (maximosndDeLista xs) 
+-- funcion auxiliar de ordenar
+-- devuelve una lista hasta la posicion n.
+tomarHasta :: [a] -> Integer -> [a]
+tomarHasta [] _ = []
+tomarHasta xs 0 = [] 
+tomarHasta (x:xs) n = x : tomarHasta xs (n-1)
 
--- Devuelve la cantidad de apariciones de un entero en una lista
-cantApariciones :: Integer -> [Integer] -> Integer
-cantApariciones n [] = 0
-cantApariciones n (x:xs) | n == x = 1 + cantApariciones n xs  
-                         | otherwise = cantApariciones n xs 
+-- funcion auxiliar de ordenar
+-- devuelve una lista borrando los elementos hasta la posicion n.
+borrarHasta :: [a] -> Integer -> [a]
+borrarHasta [] _ = []
+borrarHasta xs 0 = xs
+borrarHasta (x:xs) n = borrarHasta xs (n-1)
 
+-- funcion auxiliar de ordenar
+-- une dos listas teniendo en cuenta el orden al unir.
+unir :: (Ord a) => [a] -> [a] -> [a]
+unir [] xs = xs
+unir xs [] = xs
+unir (x:xs) (y:ys)
+    | (x < y) = x:unir xs (y:ys)
+    | otherwise = y:unir (x:xs) ys
+ 
+-- funcion auxiliar de ordenar
+-- devuelve una tupla de dos elementos donde el primero tiene
+-- los primeros elementos de la lista hasta la posicion de la mitad
+-- y el segundo el resto de la lista desde la posicion de la mitad de 
+-- la lista hasta el final.
+dividirALaMitad :: [a] -> ([a], [a])
+dividirALaMitad xs = (tomarHasta xs n, borrarHasta xs n)
+    where n = toInteger (div (length xs) 2) 
+ 
 -----------------------------------------------------------------------
 --3)
 valoresDeCamino::Tablero->Camino->[Integer]
