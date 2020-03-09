@@ -2,12 +2,12 @@
 -- TALLER DE ALGEBRA I
 -- Verano 2020
 
--- NUMERO DE GRUPO: 
+-- NUMERO DE GRUPO: 2 
 
 -- Nombre y LU/DNI de los integrantes del grupo:
--- INTEGRANTE 1:
--- INTEGRANTE 2:
--- INTEGRANTE 3:
+-- INTEGRANTE 1: Ramírez, Leandro     LU:  90/09
+-- INTEGRANTE 2: Cardozo, Alfredo     LU: 820/19
+-- INTEGRANTE 3: Giss, Rubén Ignacio  LU: 176/07
 -----------------------------------------------------------------------
 module SolucionTP
 where
@@ -81,7 +81,7 @@ maximoDeLaFila (n1:n2:ns)|n1>n2 = maximoDeLaFila (n1:ns)
 -----------------------------------------------------------------------
 --2)
 masRepetido :: Tablero -> Integer
-masRepetido ts = devuelveElMasrepetido(concatenar ts)
+masRepetido ts = devuelveElMasRepetido(concatenar ts)
 
 -- convierte el tablero en una lista
 concatenar :: Tablero -> [Integer]
@@ -89,8 +89,8 @@ concatenar (x:[]) = x
 concatenar (x:xs) = x ++ concatenar xs    
 
 -- dada una lista devuelve el mas repetido
-devuelveElMasrepetido :: [Integer] -> Integer 
-devuelveElMasrepetido xs = devuelvefstDadosnd (maximosndDeLista (listDeApariciones xs)) (listDeApariciones xs)
+devuelveElMasRepetido :: [Integer] -> Integer 
+devuelveElMasRepetido xs = devuelvefstDadosnd (maximosndDeLista (listDeApariciones xs)) (listDeApariciones xs)
 
 -- dado snd y una list de tuplas devuelve fst para ese snd de esa tupla
 devuelvefstDadosnd :: Integer -> [(Integer,Integer)] -> Integer
@@ -98,7 +98,9 @@ devuelvefstDadosnd n (x:[]) = fst x
 devuelvefstDadosnd n (x:xs) | n == snd x = fst x
                             | otherwise = (devuelvefstDadosnd n xs) 
 
--- similar a la funcion comprimir del simulacro con gran diferencia
+-- dada una lista de enteros (x:xs) devuelve una lista de pares.
+-- donde la primer coordenada del par es un elemento de la lista y la segunda coordenada es 
+-- la cantidad de veces que aparaece en la lista. 
 listDeApariciones :: [Integer] -> [(Integer,Integer)]
 listDeApariciones [] = []
 listDeApariciones (x : []) = [(x,1)] 
@@ -130,6 +132,7 @@ valoresDeCamino t (p:posiciones)= valor t p : valoresDeCamino t posiciones
 -----------------------------------------------------------------------
 --4)
 caminoDeCollatz::Tablero->Camino->Integer->Bool
+caminoDeCollatz _ [] _ = True
 caminoDeCollatz t c n= esSucesionDeCollatz (valoresDeCamino t c) n
 
 -- Dada una lista y un valor de inicializacion de la sucesion de Collatz,
